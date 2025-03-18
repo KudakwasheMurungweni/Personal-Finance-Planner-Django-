@@ -1,12 +1,26 @@
-from django.shortcuts import render
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.authentication import JWTAuthentication  # Import JWTAuthentication
-from rest_framework import viewsets
+# accounts/views.py
+from rest_framework import viewsets, generics
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.contrib.auth.models import User
 from .models import Profile
-from .serializers import ProfileSerializer
+from .serializers import ProfileSerializer, UserSerializer  # Make sure to import UserSerializer
+
+class UserCreateView(generics.CreateAPIView):
+    """User registration endpoint (no authentication required)"""
+    permission_classes = [AllowAny]
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
 
 class ProfileViewSet(viewsets.ModelViewSet):
-    authentication_classes = [JWTAuthentication]  # Use JWTAuthentication
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
+
+    def get_queryset(self):
+        """Only show the current user's profile"""
+        return Profile.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        """Automatically associate profile with logged-in user"""
+        serializer.save(user=self.request.user)
