@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'transactions',
     'budget',
     'reports',
-    'authentication',
+    
 ]
 
 MIDDLEWARE = [
@@ -139,19 +139,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True  # Change to specific origins in production
 
-CORS_ALLOW_ALL_ORIGINS = False  # Set to True only for testing
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React Dev Server
-    "https://your-angular-app.com",  # Production URL
-]
+# Set to True only for testing
+#CORS_ALLOWED_ORIGINS = [
+#    "http://localhost:3000",  # React Dev Server
+ #   "https://your-angular-app.com",  # Production URL
+#]
 
 CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',  # Add this line
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -162,9 +160,8 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
+    'ROTATE_REFRESH_TOKENS': False,  # Disable for testing
+    'BLACKLIST_AFTER_ROTATION': False, # Disable for testing
     'UPDATE_LAST_LOGIN': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
-
