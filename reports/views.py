@@ -10,3 +10,12 @@ class ReportViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
+
+
+    def get_queryset(self):
+        # Only return reports for the currently authenticated user
+        return Report.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        # Automatically set the user to the current user when creating a report
+        serializer.save(user=self.request.user)
