@@ -3,6 +3,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.models import User
 from .models import Profile
 
+
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
 
@@ -16,36 +17,38 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
+        Profile.objects.create(user=user)  # Automatically create a profile!
         return user
 
+
 class ProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
 
     class Meta:
         model = Profile
-        fields = ['id', 'user', 'phone', 'balance']
-        read_only_fields = ['id', 'user']
+        fields = ['id', 'phone', 'balance']  # Removed User
+        read_only_fields = ['id']  # Removed User
+
 
 # Custom Token Serializer
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        
+
         # Add custom claims to the token
         token['username'] = user.username
         token['email'] = user.email
         token['first_name'] = user.first_name
         token['last_name'] = user.last_name
         token['is_staff'] = user.is_staff
-        
+
         # If you have a Profile model, you can add additional fields
         try:
             profile = user.profile  # Assuming a related name 'profile'
             token['phone'] = profile.phone
-            token['balance'] = profile.balance
+            token['balance'] = str(profile.balance)  # Convert Decimal to string!
         except Profile.DoesNotExist:
             token['phone'] = None
             token['balance'] = None
-        
+
         return token
